@@ -10,13 +10,15 @@ import UIKit
 import SnapKit
 import MovieAppData
 
-class HomeScreenMoviesView: UIView, UITableViewDataSource, UITableViewDelegate{
+class HomeScreenMoviesView: UIView, UITableViewDataSource, UITableViewDelegate, SelectedMovieDelegate2{
     
     private var homeTableView: UITableView!
+    private var groupList = ["popular", "trending", "topRated", "recommended"]
+    public var selectedMovieDelegate: SelectedMovieDelegate3!
     
     override init(frame: CGRect){
         super.init(frame: frame)
-        
+
         buildViews()
         constraintViews()
     }
@@ -49,7 +51,7 @@ class HomeScreenMoviesView: UIView, UITableViewDataSource, UITableViewDelegate{
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return MovieAppData.MovieGroup.allCases.count
+        return groupList.count
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -58,13 +60,17 @@ class HomeScreenMoviesView: UIView, UITableViewDataSource, UITableViewDelegate{
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = homeTableView.dequeueReusableCell(withIdentifier: HomeScreenTableViewCell.id, for: indexPath) as! HomeScreenTableViewCell
-        
-        for view in cell.subviews{
-            view.removeFromSuperview()
-        }
-        
-        cell.configureMovieGroup(group: MovieAppData.MovieGroup.allCases[indexPath.row])
+
+        cell.configureMovieGroup(group: groupList[indexPath.row])
+        cell.selectedMovieDelegate2 = self
         return cell
     }
     
+    func selectedMovieId(movieId: Int) {
+        selectedMovieDelegate.selectedMovieId(movieId: movieId)
+    }
+}
+
+protocol SelectedMovieDelegate3{
+    func selectedMovieId(movieId: Int)
 }

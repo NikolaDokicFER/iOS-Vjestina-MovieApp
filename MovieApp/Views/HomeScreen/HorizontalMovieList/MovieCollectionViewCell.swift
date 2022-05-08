@@ -12,7 +12,7 @@ import MovieAppData
 
 class MovieCollectionViewCell: UICollectionViewCell{
     
-    static let id = "MovieCollectionCell"
+    static let id = String(describing: MovieCollectionViewCell.self)
     private var moviePoster: UIImageView!
     
     override init(frame: CGRect) {
@@ -23,9 +23,9 @@ class MovieCollectionViewCell: UICollectionViewCell{
         fatalError("Init(coder:) has not been implemented")
     }
     
-    public func configureMoviePoster(movieData: MovieModel){
-        let data = try? Data(contentsOf: URL(string: movieData.imageUrl)!)
-        moviePoster = UIImageView(image: UIImage(data: data!))
+    public func configureMoviePoster(movieData: Movie){
+        guard let data = try? Data(contentsOf: URL(string: "https://image.tmdb.org/t/p/original" + movieData.poster_path)!) else {return}
+        moviePoster = UIImageView(image: UIImage(data: data))
         moviePoster.layer.cornerRadius = 10
         moviePoster.clipsToBounds = true
         self.addSubview(moviePoster)

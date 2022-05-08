@@ -10,12 +10,15 @@ import UIKit
 import SnapKit
 import MovieAppData
 
-class HomeScreenTableViewCell: UITableViewCell{
+class HomeScreenTableViewCell: UITableViewCell, SelectMovieDelegate{
     
-    static let id = "homeScreenViewCell"
-    private var group: MovieGroup!
+    static let id = String(describing: HomeScreenTableViewCell.self)
+    private var group: String!
     private var categoryText: MovieCategoryView!
     private var moviePosters: HorizontalMoviesView!
+    private var movieList: MovieList!
+    private var categoryTitle: String!
+    public var selectedMovieDelegate2: SelectedMovieDelegate2!
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -25,40 +28,87 @@ class HomeScreenTableViewCell: UITableViewCell{
         fatalError("Init(coder:) has not been implemented")
     }
     
-    public func configureMovieGroup(group: MovieGroup){
+    public func configureMovieGroup(group: String){
         switch group {
-            case .popular:
-                moviePosters = HorizontalMoviesView(group: group)
-                categoryText = MovieCategoryView(categoryTitleText: "What's popular", buttonText1: "Streaming", buttonText2: "On TV", buttonText3: "For Rent", buttonText4: "In Theaters")
-            case .freeToWatch:
-                moviePosters = HorizontalMoviesView(group: group)
-                categoryText = MovieCategoryView(categoryTitleText: "Free to Watch", buttonText1: "Movies", buttonText2: "Shows", buttonText3: "", buttonText4: "")
-            case .trending:
-                moviePosters = HorizontalMoviesView(group: group)
-                categoryText = MovieCategoryView(categoryTitleText: "Trending", buttonText1: "Today", buttonText2: "This Week", buttonText3: "This Month", buttonText4: "All Time")
-            case .topRated:
-                moviePosters = HorizontalMoviesView(group: group)
-                categoryText = MovieCategoryView(categoryTitleText: "Top Rated", buttonText1: "Movies", buttonText2: "Shows", buttonText3: "", buttonText4: "")
-            case .upcoming:
-                moviePosters = HorizontalMoviesView(group: group)
-                categoryText = MovieCategoryView(categoryTitleText: "Coming soon", buttonText1: "Movies", buttonText2: "Shows", buttonText3: "", buttonText4: "")
+            case "popular":
+                fetchData(urlString: "https://api.themoviedb.org/3/movie/popular?language=en-US&page=1&api_key=225631dc133673048d4a801ff6951584")
+                categoryTitle = "What's popular"
+                fetchGenre()
+            case "trending":
+                fetchData(urlString: "https://api.themoviedb.org/3/trending/movie/week?api_key=225631dc133673048d4a801ff6951584&page=1")
+                categoryTitle = "Trending"
+            fetchGenre()
+            case "topRated":
+                fetchData(urlString: "https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=1&api_key=225631dc133673048d4a801ff6951584")
+                categoryTitle = "Top Rated"
+                fetchGenre()
+            case "recommended":
+                fetchData(urlString: "https://api.themoviedb.org/3/movie/103/recommendations?language=en-US&page=1&api_key=225631dc133673048d4a801ff6951584")
+                categoryTitle =  "For You"
+                fetchGenre()
+            default:
+                print("Wrong group")
         }
-        
-        self.addSubview(moviePosters)
-        self.addSubview(categoryText)
-        
-        constraintViews()
     }
     
-    private func constraintViews(){
-        categoryText.snp.makeConstraints(){
-            $0.top.leading.trailing.equalToSuperview().inset(18)
-        }
+    private func fetchData(urlString: String) {
+        guard let url = URL(string: urlString) else {return}
         
-        moviePosters.snp.makeConstraints(){
-            $0.leading.trailing.equalToSuperview().inset(18)
-            $0.top.equalTo(categoryText.snp.bottom).offset(5)
-            $0.height.equalTo(200)
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let netowrkservice = NetworkService()
+        
+        netowrkservice.executeUrlRequest(request) { (result: Result<MovieList, RequestError>) in
+            switch result{
+            case .failure(let error):
+                print(error)
+            case .success(let value):
+                self.moviePosters = HorizontalMoviesView(movies: value)
+                self.addSubview(self.moviePosters)
+                self.moviePosters.selectMovieDelegate = self
+                
+                self.moviePosters.snp.makeConstraints(){
+                    $0.leading.trailing.equalToSuperview().inset(18)
+                    $0.top.equalToSuperview().offset(70)
+                    $0.height.equalTo(200)
+                }
+            }
         }
     }
+    
+    private func fetchGenre() {
+        guard let url = URL(string: "https://api.themoviedb.org/3/genre/movie/list?language=en-US&api_key=225631dc133673048d4a801ff6951584") else {return}
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let netowrkservice = NetworkService()
+        
+        netowrkservice.executeUrlRequest(request) { (result: Result<GenreList, RequestError>) in
+            switch result{
+            case .failure(let error):
+                print(error)
+            case .success(let value):
+                self.categoryText = MovieCategoryView(categoryTitleText: self.categoryTitle, genres: value)
+                self.addSubview(self.categoryText)
+                
+                self.categoryText.snp.makeConstraints(){
+                    $0.top.leading.trailing.equalToSuperview().inset(18)
+                    $0.height.equalTo(100)
+                }
+            }
+        }
+    }
+    
+    
+    func selectedMovieId(movieId: Int) {
+        selectedMovieDelegate2?.selectedMovieId(movieId: movieId)
+    }
+}
+
+protocol SelectedMovieDelegate2{
+    func selectedMovieId(movieId: Int)
 }
