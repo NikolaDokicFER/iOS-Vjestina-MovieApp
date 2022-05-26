@@ -16,7 +16,7 @@ class SearchBarView: UIView, UITextFieldDelegate{
     private var userInputField: UITextField!
     private var deleteInputButton: UIButton!
     private var cancelInputButton: UIButton!
-    private var movieController: MovieListViewController!
+    private weak var movieController: MovieListViewController!
     
     init(controller: MovieListViewController) {
         super.init(frame: CGRect.zero)
@@ -124,7 +124,7 @@ class SearchBarView: UIView, UITextFieldDelegate{
         deleteInputButton.isHidden = true
         cancelInputButton.isHidden = true
         
-        movieController.switchViews(condition: 2)
+        movieController.updateLayout(searchBarActive: false)
     }
     
     @objc func clearInputField(){
@@ -133,6 +133,6 @@ class SearchBarView: UIView, UITextFieldDelegate{
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
         updateSearchBarView()
-        movieController.switchViews(condition: 1)
+        movieController.updateLayout(searchBarActive: true)
     }
 }

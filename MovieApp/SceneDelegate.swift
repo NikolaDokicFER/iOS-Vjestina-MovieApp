@@ -19,9 +19,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
         window  = UIWindow(windowScene: windowScene)
-        let vc = MovieListViewController()
-        let navigationController = UINavigationController(rootViewController: vc)
-        window?.rootViewController = navigationController
+        let movieListVC = MovieListViewController()
+        movieListVC.tabBarItem = UITabBarItem(title: "Home", image: UIImage(systemName: "house"), selectedImage: UIImage(systemName: "house.fill"))
+        
+        let movieFavouritesVC = MovieFavouritesViewController()
+        movieFavouritesVC.tabBarItem = UITabBarItem(title: "Favourites", image: UIImage(systemName: "heart"), selectedImage: UIImage(systemName: "heart.fill"))
+        
+        
+        let navigationController = UINavigationController(rootViewController: movieListVC)
+        
+        let tabBarController = UITabBarController()
+        tabBarController.viewControllers = [navigationController, movieFavouritesVC]
+        tabBarController.tabBar.backgroundColor = .white
+        
+        window?.rootViewController = tabBarController
         window?.makeKeyAndVisible()
     }
 

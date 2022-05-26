@@ -12,7 +12,7 @@ import MovieAppData
 
 class FocusedHomeCollectionViewCell: UICollectionViewCell{
     
-    static let id = "FocusedHomeCollectionCell"
+    static let id = String(describing: FocusedHomeCollectionViewCell.self)
     private var moviePoster: UIImageView!
     private var movieTitle: UILabel!
     private var movieDescription: UILabel!
@@ -36,8 +36,8 @@ class FocusedHomeCollectionViewCell: UICollectionViewCell{
         
         createShadows()
         
-        let data = try? Data(contentsOf: URL(string: movie.imageUrl)!)
-        moviePoster = UIImageView(image: UIImage(data: data!))
+        guard let data = try? Data(contentsOf: URL(string: movie.imageUrl)!) else {return}
+        moviePoster = UIImageView(image: UIImage(data: data))
         shapes.addSubview(moviePoster)
         
         movieTitle = UILabel()

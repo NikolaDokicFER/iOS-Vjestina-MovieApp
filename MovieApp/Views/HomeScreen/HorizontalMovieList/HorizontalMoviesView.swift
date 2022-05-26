@@ -14,14 +14,13 @@ class HorizontalMoviesView: UIView, UICollectionViewDataSource, UICollectionView
     
     private var movieCollectionView: UICollectionView!
     private var movieCollectionLayout: UICollectionViewFlowLayout!
-    private var movieGroupGiven: MovieGroup!
-    private var requestedMovies: [MovieModel]!
+    private var givenMovies: MovieList!
+    public var selectedMovieDelegate: SelectedMovieDelegate!
     
-    init(group: MovieGroup){
-        super.init(frame: CGRect.zero)
+    override init(frame: CGRect){
+        super.init(frame: frame)
         
-        movieGroupGiven = group
-        requestedMovies = [MovieModel].init()
+        givenMovies = MovieList(results: [])
         
         buildViews()
         styleViews()
@@ -55,19 +54,28 @@ class HorizontalMoviesView: UIView, UICollectionViewDataSource, UICollectionView
         }
     }
     
+    public func setMovies(movies: MovieList){
+        givenMovies = movies
+        movieCollectionView.reloadData()
+    }
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        for movie in MovieAppData.Movies.all(){
-            if(movie.group.contains(movieGroupGiven)){
-                requestedMovies.append(movie)
-            }
-        }
-        return requestedMovies.count
+        print(givenMovies.results.count)
+        return givenMovies.results.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MovieCollectionViewCell.id, for: indexPath) as! MovieCollectionViewCell
-        
-        cell.configureMoviePoster(movieData: requestedMovies[indexPath.row])
+
+        cell.configureMoviePoster(movieData: givenMovies.results[indexPath.row])
         return cell
     }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        selectedMovieDelegate?.selectedMovieId(movieId: givenMovies.results[indexPath.row].id)
+    }
+}
+
+protocol SelectedMovieDelegate{
+    func selectedMovieId(movieId: Int)
 }

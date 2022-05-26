@@ -16,11 +16,25 @@ class MovieDetailsViewController: UIViewController{
     private var movieImageView: UIView!
     private var movieOverviewView: MoviewOverviewView!
     private var tableView: UITableView!
+    private var movieId: Int!
+    private var navigationBarAppName: UIView!
+    private var navigationBarImage: UIImageView!
+    private var navBarAppearance: UINavigationBarAppearance!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithDefaultBackground()
+        appearance.backgroundColor = .blue
+        
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        navigationController?.navigationBar.compactAppearance = appearance
+        
+        fetchData(urlString: "https://api.themoviedb.org/3/movie/" + String(movieId) + "?language=en-US&page=1&api_key=225631dc133673048d4a801ff6951584")
+
         buildViews()
         styleViews()
         constraintViews()
@@ -33,21 +47,25 @@ class MovieDetailsViewController: UIViewController{
         movieImageView = UIView()
         tableView.addSubview(movieImageView)
         
-        moviePoster = UIImageView(image: UIImage(named: "IronMan.png"))
-        movieImageView.addSubview(moviePoster)
         
-        movieDetails = MoviewImageView()
-        movieImageView.addSubview(movieDetails)
+        navigationBarAppName = UIView()
+        navigationBarImage = UIImageView(image: UIImage(named: "NavBarAppLogo"))
+        navigationBarAppName.addSubview(navigationBarImage)
         
-        movieOverviewView = MoviewOverviewView()
-        tableView.addSubview(movieOverviewView)
+        navBarAppearance = UINavigationBarAppearance()
     }
     
     private func styleViews(){
         tableView.backgroundColor = .white
         
-        moviePoster.contentMode = .scaleAspectFill
-        moviePoster.clipsToBounds = true
+        navBarAppearance.configureWithDefaultBackground()
+        navBarAppearance.backgroundColor = UIColor(red: 0.043, green: 0.145, blue: 0.247, alpha: 1)
+        self.navigationController?.navigationBar.tintColor = .white
+        navigationItem.titleView = navigationBarAppName
+        
+        navigationController?.navigationBar.standardAppearance = navBarAppearance
+        navigationController?.navigationBar.scrollEdgeAppearance = navBarAppearance
+        navigationController?.navigationBar.compactAppearance = navBarAppearance
     }
     
     private func constraintViews(){
@@ -61,18 +79,58 @@ class MovieDetailsViewController: UIViewController{
             $0.width.equalToSuperview()
         }
         
-        moviePoster.snp.makeConstraints(){
-            $0.edges.equalToSuperview()
+        navigationBarImage.snp.makeConstraints(){
+            $0.centerX.equalToSuperview()
+            $0.centerY.equalToSuperview()
+            $0.height.equalTo(25)
+            $0.width.equalTo(170)
         }
+    }
+    
+    public func setMovieId(movieId: Int){
+        self.movieId = movieId
+    }
+    
+    private func fetchData(urlString: String) {
+        guard let url = URL(string: urlString) else {return}
         
-        movieDetails.snp.makeConstraints(){
-            $0.edges.equalToSuperview()
-        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        movieOverviewView.snp.makeConstraints(){
-            $0.top.equalTo(movieImageView.snp.bottom)
-            $0.leading.trailing.bottom.equalTo(tableView)
-            $0.width.equalToSuperview()
+        let networkservice = NetworkService()
+        
+        networkservice.executeUrlRequest(request) { (result: Result<MovieDetails, RequestError>) in
+            switch result{
+            case .failure(let error):
+                print(error)
+            case .success(let value):
+                
+                self.moviePoster = UIImageView()
+                self.moviePoster.kf.setImage(with: URL(string: "https://image.tmdb.org/t/p/original" + value.backdrop_path))
+                self.movieImageView.addSubview(self.moviePoster)
+                
+                self.moviePoster.contentMode = .scaleAspectFill
+                self.moviePoster.clipsToBounds = true
+                
+                self.moviePoster.snp.makeConstraints(){
+                    $0.edges.equalToSuperview()
+                }
+                
+                self.movieDetails = MoviewImageView(movieDetails: value)
+                self.movieImageView.addSubview(self.movieDetails)
+                self.movieDetails.snp.makeConstraints(){
+                    $0.edges.equalToSuperview()
+                }
+                
+                self.movieOverviewView = MoviewOverviewView(movieDetails: value)
+                self.tableView.addSubview(self.movieOverviewView)
+                self.movieOverviewView.snp.makeConstraints(){
+                    $0.top.equalTo(self.movieImageView.snp.bottom)
+                    $0.leading.trailing.bottom.equalTo(self.tableView)
+                    $0.width.equalToSuperview()
+                }
+            }
         }
     }
 }
