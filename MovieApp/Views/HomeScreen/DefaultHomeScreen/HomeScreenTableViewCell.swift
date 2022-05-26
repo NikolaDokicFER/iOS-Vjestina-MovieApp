@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import MovieAppData
 
-class HomeScreenTableViewCell: UITableViewCell, SelectMovieDelegate{
+class HomeScreenTableViewCell: UITableViewCell, SelectedMovieDelegate{
     
     static let id = String(describing: HomeScreenTableViewCell.self)
     private var group: String!
@@ -18,7 +18,7 @@ class HomeScreenTableViewCell: UITableViewCell, SelectMovieDelegate{
     private var moviePosters: HorizontalMoviesView!
     private var movieList: MovieList!
     private var categoryTitle: String!
-    public var selectedMovieDelegate2: SelectedMovieDelegate2!
+    public var selectedMovieDelegate: SelectedMovieDelegate!
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -29,6 +29,10 @@ class HomeScreenTableViewCell: UITableViewCell, SelectMovieDelegate{
     }
     
     public func configureMovieGroup(group: String){
+        moviePosters = HorizontalMoviesView()
+        addSubview(moviePosters)
+        moviePosters.selectedMovieDelegate = self
+        
         switch group {
             case "popular":
                 fetchData(urlString: "https://api.themoviedb.org/3/movie/popular?language=en-US&page=1&api_key=225631dc133673048d4a801ff6951584")
@@ -65,9 +69,7 @@ class HomeScreenTableViewCell: UITableViewCell, SelectMovieDelegate{
             case .failure(let error):
                 print(error)
             case .success(let value):
-                self.moviePosters = HorizontalMoviesView(movies: value)
-                self.addSubview(self.moviePosters)
-                self.moviePosters.selectMovieDelegate = self
+                self.moviePosters.setMovies(movies: value)
                 
                 self.moviePosters.snp.makeConstraints(){
                     $0.leading.trailing.equalToSuperview().inset(18)
@@ -105,10 +107,6 @@ class HomeScreenTableViewCell: UITableViewCell, SelectMovieDelegate{
     
     
     func selectedMovieId(movieId: Int) {
-        selectedMovieDelegate2?.selectedMovieId(movieId: movieId)
+        selectedMovieDelegate?.selectedMovieId(movieId: movieId)
     }
-}
-
-protocol SelectedMovieDelegate2{
-    func selectedMovieId(movieId: Int)
 }

@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 import SnapKit
-import MovieAppData
+import Kingfisher
 
 class MovieCollectionViewCell: UICollectionViewCell{
     
@@ -17,6 +17,8 @@ class MovieCollectionViewCell: UICollectionViewCell{
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        
+        moviePoster = UIImageView()
     }
     
     required init?(coder: NSCoder) {
@@ -24,8 +26,7 @@ class MovieCollectionViewCell: UICollectionViewCell{
     }
     
     public func configureMoviePoster(movieData: Movie){
-        guard let data = try? Data(contentsOf: URL(string: "https://image.tmdb.org/t/p/original" + movieData.poster_path)!) else {return}
-        moviePoster = UIImageView(image: UIImage(data: data))
+        moviePoster.kf.setImage(with: URL(string: "https://image.tmdb.org/t/p/original" + movieData.poster_path))
         moviePoster.layer.cornerRadius = 10
         moviePoster.clipsToBounds = true
         self.addSubview(moviePoster)

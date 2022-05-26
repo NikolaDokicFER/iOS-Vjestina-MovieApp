@@ -15,12 +15,12 @@ class HorizontalMoviesView: UIView, UICollectionViewDataSource, UICollectionView
     private var movieCollectionView: UICollectionView!
     private var movieCollectionLayout: UICollectionViewFlowLayout!
     private var givenMovies: MovieList!
-    public var selectMovieDelegate: SelectMovieDelegate!
+    public var selectedMovieDelegate: SelectedMovieDelegate!
     
-    init(movies: MovieList){
-        super.init(frame: CGRect.zero)
+    override init(frame: CGRect){
+        super.init(frame: frame)
         
-        givenMovies = movies
+        givenMovies = MovieList(results: [])
         
         buildViews()
         styleViews()
@@ -54,7 +54,13 @@ class HorizontalMoviesView: UIView, UICollectionViewDataSource, UICollectionView
         }
     }
     
+    public func setMovies(movies: MovieList){
+        givenMovies = movies
+        movieCollectionView.reloadData()
+    }
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        print(givenMovies.results.count)
         return givenMovies.results.count
     }
     
@@ -66,10 +72,10 @@ class HorizontalMoviesView: UIView, UICollectionViewDataSource, UICollectionView
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        selectMovieDelegate?.selectedMovieId(movieId: givenMovies.results[indexPath.row].id)
+        selectedMovieDelegate?.selectedMovieId(movieId: givenMovies.results[indexPath.row].id)
     }
 }
 
-protocol SelectMovieDelegate{
+protocol SelectedMovieDelegate{
     func selectedMovieId(movieId: Int)
 }

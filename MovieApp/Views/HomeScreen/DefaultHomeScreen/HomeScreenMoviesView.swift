@@ -10,11 +10,11 @@ import UIKit
 import SnapKit
 import MovieAppData
 
-class HomeScreenMoviesView: UIView, UITableViewDataSource, UITableViewDelegate, SelectedMovieDelegate2{
+class HomeScreenMoviesView: UIView, UITableViewDataSource, UITableViewDelegate, SelectedMovieDelegate{
     
     private var homeTableView: UITableView!
     private var groupList = ["popular", "trending", "topRated", "recommended"]
-    public var selectedMovieDelegate: SelectedMovieDelegate3!
+    public var selectedMovieDelegate: SelectedMovieDelegate!
     
     override init(frame: CGRect){
         super.init(frame: frame)
@@ -62,15 +62,11 @@ class HomeScreenMoviesView: UIView, UITableViewDataSource, UITableViewDelegate, 
         let cell = homeTableView.dequeueReusableCell(withIdentifier: HomeScreenTableViewCell.id, for: indexPath) as! HomeScreenTableViewCell
 
         cell.configureMovieGroup(group: groupList[indexPath.row])
-        cell.selectedMovieDelegate2 = self
+        cell.selectedMovieDelegate = self
         return cell
     }
     
     func selectedMovieId(movieId: Int) {
         selectedMovieDelegate.selectedMovieId(movieId: movieId)
     }
-}
-
-protocol SelectedMovieDelegate3{
-    func selectedMovieId(movieId: Int)
 }

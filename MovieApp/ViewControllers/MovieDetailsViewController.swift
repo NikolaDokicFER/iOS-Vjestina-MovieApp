@@ -98,17 +98,16 @@ class MovieDetailsViewController: UIViewController{
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        let netowrkservice = NetworkService()
+        let networkservice = NetworkService()
         
-        netowrkservice.executeUrlRequest(request) { (result: Result<MovieDetails, RequestError>) in
+        networkservice.executeUrlRequest(request) { (result: Result<MovieDetails, RequestError>) in
             switch result{
             case .failure(let error):
                 print(error)
             case .success(let value):
                 
-                guard let data = try? Data(contentsOf: URL(string: "https://image.tmdb.org/t/p/original" + value.backdrop_path)!) else {return}
-                
-                self.moviePoster = UIImageView(image: UIImage(data: data))
+                self.moviePoster = UIImageView()
+                self.moviePoster.kf.setImage(with: URL(string: "https://image.tmdb.org/t/p/original" + value.backdrop_path))
                 self.movieImageView.addSubview(self.moviePoster)
                 
                 self.moviePoster.contentMode = .scaleAspectFill

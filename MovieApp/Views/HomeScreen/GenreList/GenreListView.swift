@@ -56,7 +56,6 @@ class GenreListView: UIView, UICollectionViewDataSource, UICollectionViewDelegat
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: GenreCollectionViewCell.id, for: indexPath) as! GenreCollectionViewCell
-        print("DADA")
         cell.configureGenre(genreName: genres.genres[indexPath.row].name)
         return cell
     }

@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 import SnapKit
 
-class MovieListViewController: UIViewController, SelectedMovieDelegate3{
+class MovieListViewController: UIViewController, SelectedMovieDelegate{
     
     private var searchBarView: SearchBarView!
     private var homeScreenMoviesView: HomeScreenMoviesView!
