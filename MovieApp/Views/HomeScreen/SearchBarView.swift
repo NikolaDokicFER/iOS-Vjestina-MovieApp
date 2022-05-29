@@ -13,7 +13,7 @@ class SearchBarView: UIView, UITextFieldDelegate{
     
     private var containerView: UIView!
     private var magnifierImage: UIImageView!
-    private var userInputField: UITextField!
+    public var userInputField: UITextField!
     private var deleteInputButton: UIButton!
     private var cancelInputButton: UIButton!
     private weak var movieController: MovieListViewController!

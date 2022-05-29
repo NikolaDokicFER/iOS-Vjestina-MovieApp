@@ -8,10 +8,10 @@
 import Foundation
 import UIKit
 import SnapKit
-import MovieAppData
 
 class HomeScreenTableViewCell: UITableViewCell, SelectedMovieDelegate{
     
+    private var moviesRepository: MoviesRepository!
     static let id = String(describing: HomeScreenTableViewCell.self)
     private var group: String!
     private var categoryText: MovieCategoryView!
@@ -22,6 +22,9 @@ class HomeScreenTableViewCell: UITableViewCell, SelectedMovieDelegate{
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+        
+        self.contentView.isUserInteractionEnabled = true
+        moviesRepository = MoviesRepository()
     }
     
     required init?(coder: NSCoder){
@@ -62,14 +65,19 @@ class HomeScreenTableViewCell: UITableViewCell, SelectedMovieDelegate{
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        let netowrkservice = NetworkService()
+        let netowrkservice = MoviesNetworkDataSource()
         
         netowrkservice.executeUrlRequest(request) { (result: Result<MovieList, RequestError>) in
             switch result{
             case .failure(let error):
                 print(error)
             case .success(let value):
-                self.moviePosters.setMovies(movies: value)
+                let movies = value.results
+                for movie in movies{
+                    self.moviesRepository.saveMovie(movie: movie)
+                }
+                
+                self.moviePosters.setMovies(movies: movies)
                 
                 self.moviePosters.snp.makeConstraints(){
                     $0.leading.trailing.equalToSuperview().inset(18)
@@ -87,7 +95,7 @@ class HomeScreenTableViewCell: UITableViewCell, SelectedMovieDelegate{
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        let netowrkservice = NetworkService()
+        let netowrkservice = MoviesNetworkDataSource()
         
         netowrkservice.executeUrlRequest(request) { (result: Result<GenreList, RequestError>) in
             switch result{
@@ -110,3 +118,4 @@ class HomeScreenTableViewCell: UITableViewCell, SelectedMovieDelegate{
         selectedMovieDelegate?.selectedMovieId(movieId: movieId)
     }
 }
+

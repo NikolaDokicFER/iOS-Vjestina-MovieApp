@@ -12,7 +12,7 @@ import SnapKit
 class MovieDetailsViewController: UIViewController{
     
     private var moviePoster: UIImageView!
-    private var movieDetails: MoviewImageView!
+    private var movieDetails: MovieImageView!
     private var movieImageView: UIView!
     private var movieOverviewView: MoviewOverviewView!
     private var tableView: UITableView!
@@ -98,7 +98,7 @@ class MovieDetailsViewController: UIViewController{
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        let networkservice = NetworkService()
+        let networkservice = MoviesNetworkDataSource()
         
         networkservice.executeUrlRequest(request) { (result: Result<MovieDetails, RequestError>) in
             switch result{
@@ -117,7 +117,7 @@ class MovieDetailsViewController: UIViewController{
                     $0.edges.equalToSuperview()
                 }
                 
-                self.movieDetails = MoviewImageView(movieDetails: value)
+                self.movieDetails = MovieImageView(movieDetails: value)
                 self.movieImageView.addSubview(self.movieDetails)
                 self.movieDetails.snp.makeConstraints(){
                     $0.edges.equalToSuperview()

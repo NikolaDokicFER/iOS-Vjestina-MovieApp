@@ -22,14 +22,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let movieListVC = MovieListViewController()
         movieListVC.tabBarItem = UITabBarItem(title: "Home", image: UIImage(systemName: "house"), selectedImage: UIImage(systemName: "house.fill"))
         
-        let movieFavouritesVC = MovieFavouritesViewController()
+        let movieFavouritesVC = MovieFavoritesViewController()
         movieFavouritesVC.tabBarItem = UITabBarItem(title: "Favourites", image: UIImage(systemName: "heart"), selectedImage: UIImage(systemName: "heart.fill"))
         
         
         let navigationController = UINavigationController(rootViewController: movieListVC)
+        let navigationFavController = UINavigationController(rootViewController: movieFavouritesVC)
         
         let tabBarController = UITabBarController()
-        tabBarController.viewControllers = [navigationController, movieFavouritesVC]
+        tabBarController.viewControllers = [navigationController, navigationFavController]
         tabBarController.tabBar.backgroundColor = .white
         
         window?.rootViewController = tabBarController

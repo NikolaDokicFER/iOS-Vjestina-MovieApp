@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 import SnapKit
 
-class MoviewImageView: UIView{
+class MovieImageView: UIView{
     
     private var ring: UIImageView!
     private var userScorePercentage: UILabel!
@@ -18,13 +18,18 @@ class MoviewImageView: UIView{
     private var date: UILabel!
     private var genres: UILabel!
     private var runTime: UILabel!
-    private var favourite: UIImageView!
+    private var favourite: UIButton!
     private var movieDetails: MovieDetails!
+    private var moviesRepository: MoviesRepository!
+    private var favorite: Bool!
     
     init(movieDetails: MovieDetails){
         super.init(frame: CGRect.zero)
         
+        moviesRepository = MoviesRepository()
+        
         self.movieDetails = movieDetails
+        favorite = moviesRepository.checkIfFavorite(id: Int32(movieDetails.id))
         
         buildViews()
         styleViews()
@@ -57,7 +62,7 @@ class MoviewImageView: UIView{
         runTime = UILabel()
         self.addSubview(runTime)
         
-        favourite = UIImageView(image: UIImage(named: "Favourite.svg"))
+        favourite = UIButton()
         self.addSubview(favourite)
     }
     
@@ -94,6 +99,28 @@ class MoviewImageView: UIView{
         runTime.text = String(movieDetails.runtime / 60) + " h " + String(movieDetails.runtime % 60) + " m"
         runTime.textColor = .white
         runTime.font = UIFont.boldSystemFont(ofSize: 16)
+        
+        if(favorite){
+            favourite.setImage(UIImage(systemName: "star.fill"), for: .normal)
+        }else{
+            favourite.setImage(UIImage(systemName: "star"), for: .normal)
+        }
+            
+        favourite.layer.cornerRadius = 25
+        favourite.tintColor = .white
+        favourite.backgroundColor = UIColor(red: 0.459, green: 0.459, blue: 0.459, alpha: 0.6)
+        
+        favourite.addAction(.init{_ in
+            if(self.favorite){
+                self.moviesRepository.setMovieFavorite(id: Int32(self.movieDetails.id), favorite: false)
+                self.favourite.setImage(UIImage(systemName: "star"), for: .normal)
+                self.favorite = false
+            }else{
+                self.moviesRepository.setMovieFavorite(id: Int32(self.movieDetails.id), favorite: true)
+                self.favourite.setImage(UIImage(systemName: "star.fill"), for: .normal)
+                self.favorite = true
+            }
+        }, for: .touchUpInside)
     }
     
     private func constraintViews(){

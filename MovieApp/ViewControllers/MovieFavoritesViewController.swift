@@ -1,28 +1,25 @@
 //
-//  MovieListViewController.swift
+//  MovieFavouritesViewController.swift
 //  MovieApp
 //
-//  Created by Nikola Đokić on 12.04.2022..
+//  Created by Nikola Đokić on 06.05.2022..
 //
 
 import Foundation
 import UIKit
 import SnapKit
 
-class MovieListViewController: UIViewController, SelectedMovieDelegate{
-        
-    private var moviesRepository: MoviesRepository!
-    private var searchBarView: SearchBarView!
-    private var homeScreenMoviesView: HomeScreenMoviesView!
-    private var focusedHomeScreenView: HomeScreenFocusedView!
+class MovieFavoritesViewController: UIViewController, SelectedMovieDelegate{
+    
+    private var favoriteLabel: UILabel!
+    private var favoriteMoviesView: FavoriteMoviesView!
     private var navigationBarAppName: UIView!
     private var navigationBarImage: UIImageView!
     private var navBarAppearance: UINavigationBarAppearance!
-
+    private var movieRepository: MoviesRepository!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        moviesRepository = MoviesRepository()
         
         view.backgroundColor = .white
         
@@ -33,36 +30,39 @@ class MovieListViewController: UIViewController, SelectedMovieDelegate{
         navigationController?.navigationBar.standardAppearance = appearance
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
         navigationController?.navigationBar.compactAppearance = appearance
-            
+        
         buildViews()
         styleViews()
         constraintViews()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        movieRepository = MoviesRepository()
+        favoriteMoviesView.setMovies(movies: movieRepository.getFavoriteMovies())
+    }
+    
     private func buildViews(){
-        searchBarView = SearchBarView(controller: self)
-        view.addSubview(searchBarView)
+        favoriteLabel = UILabel()
+        view.addSubview(favoriteLabel)
         
-        homeScreenMoviesView = HomeScreenMoviesView()
-        homeScreenMoviesView.selectedMovieDelegate = self
-        view.addSubview(homeScreenMoviesView)
-        
-        focusedHomeScreenView = HomeScreenFocusedView()
-        focusedHomeScreenView.selectedMovieDelegate = self
-        view.addSubview(focusedHomeScreenView)
+        favoriteMoviesView = FavoriteMoviesView()
+        favoriteMoviesView.selectedMovieDelegate = self
+        view.addSubview(favoriteMoviesView)
         
         navigationBarAppName = UIView()
         navigationBarImage = UIImageView(image: UIImage(named: "NavBarAppLogo"))
         navigationBarAppName.addSubview(navigationBarImage)
         
         navBarAppearance = UINavigationBarAppearance()
-        
-        searchBarView.userInputField.addTarget(self, action: #selector(textFieldChanged(_:)), for: .editingChanged)
     }
     
     private func styleViews(){
+        favoriteLabel.text = "Favorites"
+        favoriteLabel.font = UIFont.boldSystemFont(ofSize: 20)
+        
         navBarAppearance.configureWithDefaultBackground()
         navBarAppearance.backgroundColor = UIColor(red: 0.043, green: 0.145, blue: 0.247, alpha: 1)
+        self.navigationController?.navigationBar.tintColor = .white
         navigationItem.titleView = navigationBarAppName
         
         navigationController?.navigationBar.standardAppearance = navBarAppearance
@@ -71,44 +71,22 @@ class MovieListViewController: UIViewController, SelectedMovieDelegate{
     }
     
     private func constraintViews(){
-        searchBarView.snp.makeConstraints(){
+        favoriteLabel.snp.makeConstraints({
             $0.top.equalTo(view.safeAreaLayoutGuide).offset(20)
-            $0.leading.trailing.equalToSuperview()
-            $0.height.equalTo(45)
-        }
+            $0.leading.equalToSuperview().offset(20)
+        })
         
-        homeScreenMoviesView.snp.makeConstraints(){
-            $0.top.equalTo(searchBarView.snp.bottom).offset(10)
-            $0.leading.trailing.bottom.equalToSuperview()
-        }
+        favoriteMoviesView.snp.makeConstraints({
+            $0.top.equalTo(favoriteLabel.snp.bottom).offset(10)
+            $0.leading.trailing.equalToSuperview().inset(20)
+            $0.bottom.equalToSuperview()
+        })
         
         navigationBarImage.snp.makeConstraints(){
             $0.centerX.equalToSuperview()
             $0.centerY.equalToSuperview()
             $0.height.equalTo(25)
             $0.width.equalTo(170)
-        }
-    }
-    
-    @objc func textFieldChanged(_ textField: UITextField){
-        focusedHomeScreenView.setMovies(input: textField.text!)
-    }
-    
-    public func updateLayout(searchBarActive: Bool){
-        if(searchBarActive){
-            homeScreenMoviesView.snp.removeConstraints()
-            
-            focusedHomeScreenView.snp.makeConstraints(){
-                $0.top.equalTo(searchBarView.snp.bottom).offset(20)
-                $0.leading.trailing.bottom.equalToSuperview()
-            }
-        }else{
-            focusedHomeScreenView.snp.removeConstraints()
-            
-            homeScreenMoviesView.snp.makeConstraints(){
-                $0.top.equalTo(searchBarView.snp.bottom)
-                $0.leading.trailing.bottom.equalToSuperview()
-            }
         }
     }
     

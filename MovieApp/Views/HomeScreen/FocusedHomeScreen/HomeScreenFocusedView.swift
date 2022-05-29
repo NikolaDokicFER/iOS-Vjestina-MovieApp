@@ -7,16 +7,21 @@
 
 import Foundation
 import UIKit
-import MovieAppData
 import SnapKit
 
 class HomeScreenFocusedView: UIView, UICollectionViewDataSource, UICollectionViewDelegate{
     
     private var homeCollectionView: UICollectionView!
     private var homeCollectionViewLayout: UICollectionViewFlowLayout!
+    public var selectedMovieDelegate: SelectedMovieDelegate!
+    private var moviesRepository: MoviesRepository!
+    private var movies: [Movie]!
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        
+        moviesRepository = MoviesRepository()
+        movies = moviesRepository.getMovies()
         
         buildViews()
         styleViews()
@@ -50,8 +55,14 @@ class HomeScreenFocusedView: UIView, UICollectionViewDataSource, UICollectionVie
         }
     }
     
+    public func setMovies(input: String){
+        if(!input.isEmpty){ movies = moviesRepository.getFilteredMovies(input: input)}
+        else{movies = moviesRepository.getMovies()}
+        homeCollectionView.reloadData()
+    }
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return MovieAppData.Movies.all().count
+        return movies.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -61,8 +72,12 @@ class HomeScreenFocusedView: UIView, UICollectionViewDataSource, UICollectionVie
             view.removeFromSuperview()
         }
         
-        cell.configureMovie(movie: MovieAppData.Movies.all()[indexPath.row])
+        cell.configureMovie(movie: movies[indexPath.row])
         return cell
     }
     
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        selectedMovieDelegate.selectedMovieId(movieId: Int(movies[indexPath.row].id))
+    }
 }
+

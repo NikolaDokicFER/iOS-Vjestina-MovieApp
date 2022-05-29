@@ -1,13 +1,13 @@
 //
-//  NetworkService.swift
+//  MoviesNetworkDataSource.swift
 //  MovieApp
 //
-//  Created by Nikola Đokić on 07.05.2022..
+//  Created by Nikola Đokić on 26.05.2022..
 //
 
 import Foundation
 
-class NetworkService{
+class MoviesNetworkDataSource{
     
     func executeUrlRequest<T: Decodable>(_ request: URLRequest, completionHandler: @escaping (Result<T, RequestError>) -> Void){
         
