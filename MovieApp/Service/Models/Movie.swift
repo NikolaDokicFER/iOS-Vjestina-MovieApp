@@ -17,12 +17,12 @@ struct Movie: Codable{
     
     init(fromModel model: MovieDataBase) {
         self.id = model.id
-        self.title = model.title!
-        self.release_date = model.release_date!
-        self.overview = model.overview!
+        self.title = model.title ?? ""
+        self.release_date = model.releaseDate ?? ""
+        self.overview = model.overview ?? ""
         self.popularity = model.popularity
-        self.genre_ids = (model.genre_ids as? [Int16])!
-        self.backdrop_path = model.backdrop_path!
-        self.poster_path = model.poster_path!
+        self.genre_ids = model.genreIds ?? [0]
+        self.backdrop_path = model.backdropPath ?? ""
+        self.poster_path = model.posterPath ?? ""
     }
 }

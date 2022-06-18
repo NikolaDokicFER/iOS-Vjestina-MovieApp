@@ -11,7 +11,6 @@ import SnapKit
 
 class HomeScreenTableViewCell: UITableViewCell, SelectedMovieDelegate{
     
-    private var moviesRepository: MoviesRepository!
     static let id = String(describing: HomeScreenTableViewCell.self)
     private var group: String!
     private var categoryText: MovieCategoryView!
@@ -19,12 +18,13 @@ class HomeScreenTableViewCell: UITableViewCell, SelectedMovieDelegate{
     private var movieList: MovieList!
     private var categoryTitle: String!
     public var selectedMovieDelegate: SelectedMovieDelegate!
+    private var networkData = MoviesNetworkDataSource()
+    private var moviesRepository = MoviesRepository()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         self.contentView.isUserInteractionEnabled = true
-        moviesRepository = MoviesRepository()
     }
     
     required init?(coder: NSCoder){
@@ -59,25 +59,16 @@ class HomeScreenTableViewCell: UITableViewCell, SelectedMovieDelegate{
     }
     
     private func fetchData(urlString: String) {
-        guard let url = URL(string: urlString) else {return}
         
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let netowrkservice = MoviesNetworkDataSource()
-        
-        netowrkservice.executeUrlRequest(request) { (result: Result<MovieList, RequestError>) in
+        networkData.fetchMovies(path: urlString, completionHandler:{ (result: Result<MovieList, RequestError>) in
             switch result{
             case .failure(let error):
                 print(error)
             case .success(let value):
-                let movies = value.results
-                for movie in movies{
-                    self.moviesRepository.saveMovie(movie: movie)
-                }
+                self.moviesRepository.saveMovies(movies: value.results)
                 
-                self.moviePosters.setMovies(movies: movies)
+                
+                self.moviePosters.setMovies(movies: value.results)
                 
                 self.moviePosters.snp.makeConstraints(){
                     $0.leading.trailing.equalToSuperview().inset(18)
@@ -85,19 +76,13 @@ class HomeScreenTableViewCell: UITableViewCell, SelectedMovieDelegate{
                     $0.height.equalTo(200)
                 }
             }
-        }
+        })
     }
     
     private func fetchGenre() {
-        guard let url = URL(string: "https://api.themoviedb.org/3/genre/movie/list?language=en-US&api_key=225631dc133673048d4a801ff6951584") else {return}
+        let urlString = "https://api.themoviedb.org/3/genre/movie/list?language=en-US&api_key=225631dc133673048d4a801ff6951584"
         
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let netowrkservice = MoviesNetworkDataSource()
-        
-        netowrkservice.executeUrlRequest(request) { (result: Result<GenreList, RequestError>) in
+        networkData.fetchGenre(path: urlString, completionHandler: { (result: Result<GenreList, RequestError>) in
             switch result{
             case .failure(let error):
                 print(error)
@@ -110,7 +95,7 @@ class HomeScreenTableViewCell: UITableViewCell, SelectedMovieDelegate{
                     $0.height.equalTo(100)
                 }
             }
-        }
+        })
     }
     
     

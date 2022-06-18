@@ -2,13 +2,12 @@
 //  MovieDataBase+CoreDataProperties.swift
 //  MovieApp
 //
-//  Created by Nikola Đokić on 26.05.2022..
+//  Created by Nikola Đokić on 15.06.2022..
 //
 //
 
 import Foundation
 import CoreData
-
 
 extension MovieDataBase {
 
@@ -17,20 +16,20 @@ extension MovieDataBase {
     }
 
     @NSManaged public var adult: Bool
-    @NSManaged public var backdrop_path: String?
+    @NSManaged public var backdropPath: String?
     @NSManaged public var favourite: Bool
-    @NSManaged public var genre_ids: NSObject?
+    @NSManaged public var genreIds: [Int16]?
     @NSManaged public var id: Int32
-    @NSManaged public var original_language: String?
-    @NSManaged public var original_title: String?
+    @NSManaged public var originalLanguage: String?
+    @NSManaged public var originalTitle: String?
     @NSManaged public var overview: String?
     @NSManaged public var popularity: Double
-    @NSManaged public var poster_path: String?
-    @NSManaged public var release_date: String?
+    @NSManaged public var posterPath: String?
+    @NSManaged public var releaseDate: String?
     @NSManaged public var title: String?
     @NSManaged public var video: String?
-    @NSManaged public var vote_average: Double
-    @NSManaged public var vote_count: Int32
+    @NSManaged public var voteAverage: Double
+    @NSManaged public var voteCount: Int32
     @NSManaged public var movie_genres: NSSet?
     @NSManaged public var movie_groups: NSSet?
 

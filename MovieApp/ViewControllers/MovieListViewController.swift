@@ -11,7 +11,7 @@ import SnapKit
 
 class MovieListViewController: UIViewController, SelectedMovieDelegate{
         
-    private var moviesRepository: MoviesRepository!
+    private var moviesRepository = MoviesRepository()
     private var searchBarView: SearchBarView!
     private var homeScreenMoviesView: HomeScreenMoviesView!
     private var focusedHomeScreenView: HomeScreenFocusedView!
@@ -21,9 +21,7 @@ class MovieListViewController: UIViewController, SelectedMovieDelegate{
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        moviesRepository = MoviesRepository()
-        
+
         view.backgroundColor = .white
         
         let appearance = UINavigationBarAppearance()
@@ -47,7 +45,9 @@ class MovieListViewController: UIViewController, SelectedMovieDelegate{
         homeScreenMoviesView.selectedMovieDelegate = self
         view.addSubview(homeScreenMoviesView)
         
-        focusedHomeScreenView = HomeScreenFocusedView()
+        let movies = moviesRepository.getMovies()
+        
+        focusedHomeScreenView = HomeScreenFocusedView(movies: movies)
         focusedHomeScreenView.selectedMovieDelegate = self
         view.addSubview(focusedHomeScreenView)
         
@@ -91,7 +91,14 @@ class MovieListViewController: UIViewController, SelectedMovieDelegate{
     }
     
     @objc func textFieldChanged(_ textField: UITextField){
-        focusedHomeScreenView.setMovies(input: textField.text!)
+        let movies:[Movie]
+        if(!textField.text!.isEmpty){
+            movies = moviesRepository.getFilteredMovies(input: textField.text!)
+        }
+        else{
+            movies = moviesRepository.getMovies()
+        }
+        focusedHomeScreenView.setMovies(movies: movies)
     }
     
     public func updateLayout(searchBarActive: Bool){

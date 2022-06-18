@@ -16,7 +16,7 @@ class MovieFavoritesViewController: UIViewController, SelectedMovieDelegate{
     private var navigationBarAppName: UIView!
     private var navigationBarImage: UIImageView!
     private var navBarAppearance: UINavigationBarAppearance!
-    private var movieRepository: MoviesRepository!
+    private var movieRepository = MoviesRepository()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,7 +37,6 @@ class MovieFavoritesViewController: UIViewController, SelectedMovieDelegate{
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        movieRepository = MoviesRepository()
         favoriteMoviesView.setMovies(movies: movieRepository.getFavoriteMovies())
     }
     
@@ -45,7 +44,9 @@ class MovieFavoritesViewController: UIViewController, SelectedMovieDelegate{
         favoriteLabel = UILabel()
         view.addSubview(favoriteLabel)
         
-        favoriteMoviesView = FavoriteMoviesView()
+        let movies = movieRepository.getFavoriteMovies()
+        
+        favoriteMoviesView = FavoriteMoviesView(movies: movies)
         favoriteMoviesView.selectedMovieDelegate = self
         view.addSubview(favoriteMoviesView)
         
@@ -73,7 +74,7 @@ class MovieFavoritesViewController: UIViewController, SelectedMovieDelegate{
     private func constraintViews(){
         favoriteLabel.snp.makeConstraints({
             $0.top.equalTo(view.safeAreaLayoutGuide).offset(20)
-            $0.leading.equalToSuperview().offset(20)
+            $0.leading.trailing.equalToSuperview().offset(20)
         })
         
         favoriteMoviesView.snp.makeConstraints({

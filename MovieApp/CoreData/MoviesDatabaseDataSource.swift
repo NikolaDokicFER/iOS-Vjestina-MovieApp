@@ -10,34 +10,33 @@ import CoreData
 
 class MoviesDatabaseDataSource{
     private var movies: [MovieDataBase] = []
-    private var appDelegate: AppDelegate
+    private var coreDataStack = CoreDataStack()
     
-    init(){
-        appDelegate = AppDelegate()
-    }
+    init(){}
     
-    func saveMovie(movieGiven: Movie){
-        let managedContext = appDelegate.persistentContainer.viewContext
+    func saveMovie(moviesGiven: [Movie]){
+        let managedContext = coreDataStack.persistentContainer.viewContext
         
-        let entity = NSEntityDescription.entity(forEntityName: "MovieDataBase", in: managedContext)!
-        
-        let movie: MovieDataBase
-        
-        if(checkIfExists(id: movieGiven.id)){
-            movie = fetchMovie(id: movieGiven.id)!
-        }else{
-            movie = MovieDataBase(entity: entity, insertInto: managedContext)
-            movie.favourite = false
+        for movie in moviesGiven{
+            var newMovie = NSEntityDescription.insertNewObject(forEntityName: "MovieDataBase", into: managedContext)
+            
+            if(checkIfExists(id: movie.id)){
+                guard let existingMovie = fetchMovie(id: movie.id) else{return}
+                newMovie = existingMovie
+            }else{
+                newMovie.setValue(false, forKey: "favourite")
+            }
+            
+            newMovie.setValue(movie.title, forKey: "title")
+            newMovie.setValue(movie.overview, forKey: "overview")
+            newMovie.setValue(movie.poster_path, forKey: "posterPath")
+            newMovie.setValue(movie.backdrop_path, forKey: "backdropPath")
+            newMovie.setValue(movie.genre_ids, forKey: "genreIds")
+            newMovie.setValue(movie.popularity, forKey: "popularity")
+            newMovie.setValue(movie.release_date, forKey: "releaseDate")
+            newMovie.setValue(movie.id, forKey: "id")
+
         }
-        
-        movie.title = movieGiven.title
-        movie.overview = movieGiven.overview
-        movie.poster_path = movieGiven.poster_path
-        movie.backdrop_path =  movieGiven.backdrop_path
-        movie.genre_ids =  movieGiven.genre_ids as NSObject
-        movie.popularity =  movieGiven.popularity
-        movie.release_date =  movieGiven.release_date
-        movie.id = movieGiven.id
         
         do{
             try managedContext.save()
@@ -47,7 +46,7 @@ class MoviesDatabaseDataSource{
     }
     
     func setMovieFavorite(id: Int32, favorite: Bool){
-        let managedContext = appDelegate.persistentContainer.viewContext
+        let managedContext = coreDataStack.persistentContainer.viewContext
         
         let movie: MovieDataBase
         
@@ -67,7 +66,7 @@ class MoviesDatabaseDataSource{
     }
     
     func fetchMovies() -> [MovieDataBase] {
-        let managedContext = appDelegate.persistentContainer.viewContext
+        let managedContext = coreDataStack.persistentContainer.viewContext
         let request: NSFetchRequest<MovieDataBase> = MovieDataBase.fetchRequest()
         
         do {
@@ -80,7 +79,7 @@ class MoviesDatabaseDataSource{
     }
     
     func fetchMovie(id: Int32) -> MovieDataBase? {
-        let managedContext = appDelegate.persistentContainer.viewContext
+        let managedContext = coreDataStack.persistentContainer.viewContext
         let request: NSFetchRequest<MovieDataBase> = MovieDataBase.fetchRequest()
         let predicate = NSPredicate(format: "id = %@", "\(id)")
         request.predicate = predicate
@@ -96,7 +95,7 @@ class MoviesDatabaseDataSource{
     }
     
     func fetchFilteredMovies(input: String) -> [MovieDataBase]{
-        let managedContext = appDelegate.persistentContainer.viewContext
+        let managedContext = coreDataStack.persistentContainer.viewContext
         let request: NSFetchRequest<MovieDataBase> = MovieDataBase.fetchRequest()
         let filter = NSPredicate(format: "title contains [cd] %@", input)
         request.predicate = filter
@@ -111,7 +110,7 @@ class MoviesDatabaseDataSource{
     }
     
     func fetchFavoriteMovies() -> [MovieDataBase]{
-        let managedContext = appDelegate.persistentContainer.viewContext
+        let managedContext = coreDataStack.persistentContainer.viewContext
         let request: NSFetchRequest<MovieDataBase> = MovieDataBase.fetchRequest()
         let predicate = NSPredicate(format: "favourite = %d", true)
         request.predicate = predicate
@@ -126,7 +125,7 @@ class MoviesDatabaseDataSource{
     }
     
     func checkIfExists(id: Int32) -> Bool {
-        let managedContext = appDelegate.persistentContainer.viewContext
+        let managedContext = coreDataStack.persistentContainer.viewContext
         let request: NSFetchRequest<MovieDataBase> = MovieDataBase.fetchRequest()
         let predicate = NSPredicate(format: "id = %@", "\(id)")
         request.predicate = predicate
@@ -145,18 +144,8 @@ class MoviesDatabaseDataSource{
     }
     
     func fetchFavorite(id: Int32) -> Bool?{
-        let managedContext = appDelegate.persistentContainer.viewContext
-        let request: NSFetchRequest<MovieDataBase> = MovieDataBase.fetchRequest()
-        let predicate = NSPredicate(format: "id = %@", "\(id)")
-        request.predicate = predicate
-        request.fetchLimit = 1
+        let movie = fetchMovie(id: id)
         
-        do {
-            return try managedContext.fetch(request).first?.favourite
-        }
-        catch {
-            print("error executing fetch request: \(error)")
-            return nil
-        }
+        return movie?.favourite
     }
 }

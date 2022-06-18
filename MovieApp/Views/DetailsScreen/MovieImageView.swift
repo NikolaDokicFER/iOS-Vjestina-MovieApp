@@ -18,7 +18,7 @@ class MovieImageView: UIView{
     private var date: UILabel!
     private var genres: UILabel!
     private var runTime: UILabel!
-    private var favourite: UIButton!
+    private var favoriteButton: UIButton!
     private var movieDetails: MovieDetails!
     private var moviesRepository: MoviesRepository!
     private var favorite: Bool!
@@ -62,8 +62,8 @@ class MovieImageView: UIView{
         runTime = UILabel()
         self.addSubview(runTime)
         
-        favourite = UIButton()
-        self.addSubview(favourite)
+        favoriteButton = UIButton()
+        self.addSubview(favoriteButton)
     }
     
     private func styleViews(){        
@@ -100,26 +100,18 @@ class MovieImageView: UIView{
         runTime.textColor = .white
         runTime.font = UIFont.boldSystemFont(ofSize: 16)
         
-        if(favorite){
-            favourite.setImage(UIImage(systemName: "star.fill"), for: .normal)
-        }else{
-            favourite.setImage(UIImage(systemName: "star"), for: .normal)
-        }
-            
-        favourite.layer.cornerRadius = 25
-        favourite.tintColor = .white
-        favourite.backgroundColor = UIColor(red: 0.459, green: 0.459, blue: 0.459, alpha: 0.6)
+        setFavoriteImage(isFavorite: favorite)
         
-        favourite.addAction(.init{_ in
-            if(self.favorite){
-                self.moviesRepository.setMovieFavorite(id: Int32(self.movieDetails.id), favorite: false)
-                self.favourite.setImage(UIImage(systemName: "star"), for: .normal)
-                self.favorite = false
-            }else{
-                self.moviesRepository.setMovieFavorite(id: Int32(self.movieDetails.id), favorite: true)
-                self.favourite.setImage(UIImage(systemName: "star.fill"), for: .normal)
-                self.favorite = true
-            }
+        favoriteButton.layer.cornerRadius = 25
+        favoriteButton.tintColor = .white
+        favoriteButton.backgroundColor = UIColor(red: 0.459, green: 0.459, blue: 0.459, alpha: 0.6)
+        
+        favoriteButton.addAction(.init{[weak self] _ in
+            guard let self = self else {return}
+            
+            self.moviesRepository.setMovieFavorite(id: Int32(self.movieDetails.id), favorite: !self.favorite)
+            self.setFavoriteImage(isFavorite: !self.favorite)
+            self.favorite = !self.favorite
         }, for: .touchUpInside)
     }
     
@@ -152,21 +144,26 @@ class MovieImageView: UIView{
         }
 
         genres.snp.makeConstraints(){
-            $0.bottom.equalTo(favourite.snp.top).offset(-5)
+            $0.bottom.equalTo(favoriteButton.snp.top).offset(-5)
             $0.leading.trailing.equalToSuperview().offset(18)
         }
 
         runTime.snp.makeConstraints(){
-            $0.bottom.equalTo(favourite.snp.bottom).inset(10)
-            $0.leading.equalTo(favourite.snp.trailing).offset(20)
+            $0.bottom.equalTo(favoriteButton.snp.bottom).inset(10)
+            $0.leading.equalTo(favoriteButton.snp.trailing).offset(20)
         }
 
-        favourite.snp.makeConstraints(){
+        favoriteButton.snp.makeConstraints(){
             $0.bottom.equalToSuperview().inset(5)
             $0.leading.equalToSuperview().offset(18)
             $0.height.equalTo(50)
             $0.width.equalTo(50)
         }
+    }
+    
+    private func setFavoriteImage(isFavorite: Bool){
+        let image = isFavorite ? UIImage(systemName: "star.fill") : UIImage(systemName: "star")
+        favoriteButton.setImage(image, for: .normal)
     }
     
     public func setMovieDetails(movieDetails: MovieDetails){

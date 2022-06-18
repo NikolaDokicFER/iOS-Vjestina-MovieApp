@@ -14,14 +14,12 @@ class HomeScreenFocusedView: UIView, UICollectionViewDataSource, UICollectionVie
     private var homeCollectionView: UICollectionView!
     private var homeCollectionViewLayout: UICollectionViewFlowLayout!
     public var selectedMovieDelegate: SelectedMovieDelegate!
-    private var moviesRepository: MoviesRepository!
     private var movies: [Movie]!
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    init(movies: [Movie]) {
+        super.init(frame: CGRect.zero)
         
-        moviesRepository = MoviesRepository()
-        movies = moviesRepository.getMovies()
+        self.movies = movies
         
         buildViews()
         styleViews()
@@ -55,9 +53,8 @@ class HomeScreenFocusedView: UIView, UICollectionViewDataSource, UICollectionVie
         }
     }
     
-    public func setMovies(input: String){
-        if(!input.isEmpty){ movies = moviesRepository.getFilteredMovies(input: input)}
-        else{movies = moviesRepository.getMovies()}
+    public func setMovies(movies: [Movie]){
+        self.movies = movies
         homeCollectionView.reloadData()
     }
     

@@ -12,16 +12,14 @@ import UIKit
 class FavoriteMoviesView: UIView, UICollectionViewDelegate, UICollectionViewDataSource{
    
     private var movies: [Movie] = []
-    private var movieRepository: MoviesRepository!
     private var favoriteCollectionView: UICollectionView!
     public var selectedMovieDelegate: SelectedMovieDelegate!
     private var favoriteCollectionLayout: UICollectionViewFlowLayout!
     
-    override init(frame: CGRect){
-        super.init(frame: frame)
+    init(movies: [Movie]){
+        super.init(frame: CGRect.zero)
         
-        movieRepository = MoviesRepository()
-        movies = movieRepository.getFavoriteMovies()
+        self.movies = movies
         
         buildViews()
         styleViews()

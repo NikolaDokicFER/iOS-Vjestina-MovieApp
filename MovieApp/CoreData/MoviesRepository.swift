@@ -19,12 +19,7 @@ class MoviesRepository{
     
     
     func getMovies() -> [Movie]{
-        lazy var movies: [Movie] = {
-            let moviesModel = moviesDatabaseDataSource.fetchMovies()
-        return moviesModel.map { Movie(fromModel: $0) }
-        }()
-        
-        return movies
+        moviesDatabaseDataSource.fetchMovies().map { Movie(fromModel: $0) }
     }
     
     func getFilteredMovies(input: String) -> [Movie]{
@@ -36,8 +31,8 @@ class MoviesRepository{
         return movies
     }
     
-    func saveMovie(movie: Movie){
-        moviesDatabaseDataSource.saveMovie(movieGiven: movie)
+    func saveMovies(movies: [Movie]){
+        moviesDatabaseDataSource.saveMovie(moviesGiven: movies)
     }
     
     func doesExist(id: Int32) -> Bool{
