@@ -14,30 +14,31 @@ class MovieImageView: UIView{
     private var ring: UIImageView!
     private var userScorePercentage: UILabel!
     private var userScore: UILabel!
-    private var movieName: UILabel!
-    private var date: UILabel!
-    private var genres: UILabel!
+    var movieName = UILabel()
+    var date: UILabel!
+    var genres: UILabel!
     private var runTime: UILabel!
-    private var favoriteButton: UIButton!
+    var favoriteButton: UIButton!
     private var movieDetails: MovieDetails!
-    private var moviesRepository: MoviesRepository!
+    private var moviesRepository = MoviesRepository()
     private var favorite: Bool!
     
-    init(movieDetails: MovieDetails){
-        super.init(frame: CGRect.zero)
+    override init(frame: CGRect){
+        super.init(frame: frame)
         
-        moviesRepository = MoviesRepository()
-        
+    }
+    
+    required init?(coder:NSCoder){
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    public func setMovie(movieDetails: MovieDetails){
         self.movieDetails = movieDetails
         favorite = moviesRepository.checkIfFavorite(id: Int32(movieDetails.id))
         
         buildViews()
         styleViews()
         constraintViews()
-    }
-    
-    required init?(coder:NSCoder){
-        fatalError("init(coder:) has not been implemented")
     }
     
     private func buildViews(){
@@ -135,7 +136,7 @@ class MovieImageView: UIView{
 
         movieName.snp.makeConstraints(){
             $0.bottom.equalTo(date.snp.top).offset(-10)
-            $0.leading.equalToSuperview().offset(18)
+            $0.leading.trailing.equalToSuperview().offset(18)
         }
 
         date.snp.makeConstraints(){
