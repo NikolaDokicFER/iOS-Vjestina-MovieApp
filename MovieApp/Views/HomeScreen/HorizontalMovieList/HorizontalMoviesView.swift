@@ -8,19 +8,20 @@
 import Foundation
 import UIKit
 import SnapKit
-import MovieAppData
 
 class HorizontalMoviesView: UIView, UICollectionViewDataSource, UICollectionViewDelegate{
     
+    private var moviesRepository: MoviesRepository!
     private var movieCollectionView: UICollectionView!
     private var movieCollectionLayout: UICollectionViewFlowLayout!
-    private var givenMovies: MovieList!
+    private var movies: [Movie]!
     public var selectedMovieDelegate: SelectedMovieDelegate!
     
     override init(frame: CGRect){
-        super.init(frame: frame)
+        super.init(frame: frame) 
         
-        givenMovies = MovieList(results: [])
+        moviesRepository = MoviesRepository()
+        movies =  moviesRepository.getMovies()
         
         buildViews()
         styleViews()
@@ -54,25 +55,25 @@ class HorizontalMoviesView: UIView, UICollectionViewDataSource, UICollectionView
         }
     }
     
-    public func setMovies(movies: MovieList){
-        givenMovies = movies
+    public func setMovies(movies: [Movie]){
+        self.movies = movies
         movieCollectionView.reloadData()
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        print(givenMovies.results.count)
-        return givenMovies.results.count
+        return movies.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MovieCollectionViewCell.id, for: indexPath) as! MovieCollectionViewCell
 
-        cell.configureMoviePoster(movieData: givenMovies.results[indexPath.row])
+        cell.configureMoviePoster(movieData: movies[indexPath.row])
+        cell.setAction(id: movies[indexPath.row].id)
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        selectedMovieDelegate?.selectedMovieId(movieId: givenMovies.results[indexPath.row].id)
+        selectedMovieDelegate?.selectedMovieId(movieId: Int(movies[indexPath.row].id))
     }
 }
 

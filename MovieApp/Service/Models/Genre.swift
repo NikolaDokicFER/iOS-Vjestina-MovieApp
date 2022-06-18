@@ -2,7 +2,7 @@
 //  Genre.swift
 //  MovieApp
 //
-//  Created by Nikola Đokić on 07.05.2022..
+//  Created by Nikola Đokić on 26.05.2022..
 //
 
 struct Genre: Codable{

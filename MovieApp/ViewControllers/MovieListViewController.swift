@@ -10,7 +10,8 @@ import UIKit
 import SnapKit
 
 class MovieListViewController: UIViewController, SelectedMovieDelegate{
-    
+        
+    private var moviesRepository = MoviesRepository()
     private var searchBarView: SearchBarView!
     private var homeScreenMoviesView: HomeScreenMoviesView!
     private var focusedHomeScreenView: HomeScreenFocusedView!
@@ -20,27 +21,20 @@ class MovieListViewController: UIViewController, SelectedMovieDelegate{
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        
+
         view.backgroundColor = .white
         
-        if (!NetworkMonitor.shared.isConnected) {
-            let alert = UIAlertController(title: "No internet", message: "You are not connected to the internet", preferredStyle: .alert)
-            self.present(alert, animated: true)
-        }else{
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithDefaultBackground()
+        appearance.backgroundColor = .blue
         
-            let appearance = UINavigationBarAppearance()
-            appearance.configureWithDefaultBackground()
-            appearance.backgroundColor = .blue
-        
-            navigationController?.navigationBar.standardAppearance = appearance
-            navigationController?.navigationBar.scrollEdgeAppearance = appearance
-            navigationController?.navigationBar.compactAppearance = appearance
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        navigationController?.navigationBar.compactAppearance = appearance
             
-            buildViews()
-            styleViews()
-            constraintViews()
-        }
+        buildViews()
+        styleViews()
+        constraintViews()
     }
     
     private func buildViews(){
@@ -51,7 +45,10 @@ class MovieListViewController: UIViewController, SelectedMovieDelegate{
         homeScreenMoviesView.selectedMovieDelegate = self
         view.addSubview(homeScreenMoviesView)
         
-        focusedHomeScreenView = HomeScreenFocusedView()
+        let movies = moviesRepository.getMovies()
+        
+        focusedHomeScreenView = HomeScreenFocusedView(movies: movies)
+        focusedHomeScreenView.selectedMovieDelegate = self
         view.addSubview(focusedHomeScreenView)
         
         navigationBarAppName = UIView()
@@ -60,6 +57,7 @@ class MovieListViewController: UIViewController, SelectedMovieDelegate{
         
         navBarAppearance = UINavigationBarAppearance()
         
+        searchBarView.userInputField.addTarget(self, action: #selector(textFieldChanged(_:)), for: .editingChanged)
     }
     
     private func styleViews(){
@@ -90,6 +88,17 @@ class MovieListViewController: UIViewController, SelectedMovieDelegate{
             $0.height.equalTo(25)
             $0.width.equalTo(170)
         }
+    }
+    
+    @objc func textFieldChanged(_ textField: UITextField){
+        let movies:[Movie]
+        if(!textField.text!.isEmpty){
+            movies = moviesRepository.getFilteredMovies(input: textField.text!)
+        }
+        else{
+            movies = moviesRepository.getMovies()
+        }
+        focusedHomeScreenView.setMovies(movies: movies)
     }
     
     public func updateLayout(searchBarActive: Bool){

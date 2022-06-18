@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 import SnapKit
-import MovieAppData
+import Kingfisher
 
 class FocusedHomeCollectionViewCell: UICollectionViewCell{
     
@@ -27,7 +27,7 @@ class FocusedHomeCollectionViewCell: UICollectionViewCell{
         fatalError("Init(coder:) has not been implemented")
     }
     
-    public func configureMovie(movie: MovieModel){
+    public func configureMovie(movie: Movie){
         shadow = UIView()
         self.contentView.addSubview(shadow)
         
@@ -36,8 +36,8 @@ class FocusedHomeCollectionViewCell: UICollectionViewCell{
         
         createShadows()
         
-        guard let data = try? Data(contentsOf: URL(string: movie.imageUrl)!) else {return}
-        moviePoster = UIImageView(image: UIImage(data: data))
+        moviePoster = UIImageView()
+        moviePoster.kf.setImage(with: URL(string: "https://image.tmdb.org/t/p/original" + movie.poster_path))
         shapes.addSubview(moviePoster)
         
         movieTitle = UILabel()
@@ -45,7 +45,7 @@ class FocusedHomeCollectionViewCell: UICollectionViewCell{
         shapes.addSubview(movieTitle)
         
         movieDescription = UILabel()
-        movieDescription.text = movie.description
+        movieDescription.text = movie.overview
         shapes.addSubview(movieDescription)
         
         styleViews()

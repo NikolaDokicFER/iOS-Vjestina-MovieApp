@@ -12,7 +12,7 @@ import SnapKit
 class MovieDetailsViewController: UIViewController{
     
     private var moviePoster: UIImageView!
-    private var movieDetails: MoviewImageView!
+    private var movieDetails: MovieImageView!
     private var movieImageView: UIView!
     private var movieOverviewView: MoviewOverviewView!
     private var tableView: UITableView!
@@ -20,6 +20,7 @@ class MovieDetailsViewController: UIViewController{
     private var navigationBarAppName: UIView!
     private var navigationBarImage: UIImageView!
     private var navBarAppearance: UINavigationBarAppearance!
+    private var networkData = MoviesNetworkDataSource()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,7 +35,7 @@ class MovieDetailsViewController: UIViewController{
         navigationController?.navigationBar.compactAppearance = appearance
         
         fetchData(urlString: "https://api.themoviedb.org/3/movie/" + String(movieId) + "?language=en-US&page=1&api_key=225631dc133673048d4a801ff6951584")
-
+        
         buildViews()
         styleViews()
         constraintViews()
@@ -92,15 +93,8 @@ class MovieDetailsViewController: UIViewController{
     }
     
     private func fetchData(urlString: String) {
-        guard let url = URL(string: urlString) else {return}
         
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let networkservice = NetworkService()
-        
-        networkservice.executeUrlRequest(request) { (result: Result<MovieDetails, RequestError>) in
+        networkData.fetchMovieDetails(path: urlString, completionHandler: {(result: Result<MovieDetails, RequestError>) in
             switch result{
             case .failure(let error):
                 print(error)
@@ -117,7 +111,7 @@ class MovieDetailsViewController: UIViewController{
                     $0.edges.equalToSuperview()
                 }
                 
-                self.movieDetails = MoviewImageView(movieDetails: value)
+                self.movieDetails = MovieImageView(movieDetails: value)
                 self.movieImageView.addSubview(self.movieDetails)
                 self.movieDetails.snp.makeConstraints(){
                     $0.edges.equalToSuperview()
@@ -131,6 +125,6 @@ class MovieDetailsViewController: UIViewController{
                     $0.width.equalToSuperview()
                 }
             }
-        }
+        })
     }
 }
