@@ -12,8 +12,8 @@ import SnapKit
 class MovieDetailsViewController: UIViewController{
     
     private var moviePoster: UIImageView!
-    private var movieDetails: MovieImageView!
-    private var movieImageView: UIView!
+    private var movieDetailsView = MovieImageView()
+    private var moviePosterView: UIView!
     private var movieOverviewView: MoviewOverviewView!
     private var tableView: UITableView!
     private var movieId: Int!
@@ -21,6 +21,7 @@ class MovieDetailsViewController: UIViewController{
     private var navigationBarImage: UIImageView!
     private var navBarAppearance: UINavigationBarAppearance!
     private var networkData = MoviesNetworkDataSource()
+    private var group = DispatchGroup()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,19 +35,48 @@ class MovieDetailsViewController: UIViewController{
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
         navigationController?.navigationBar.compactAppearance = appearance
         
-        fetchData(urlString: "https://api.themoviedb.org/3/movie/" + String(movieId) + "?language=en-US&page=1&api_key=225631dc133673048d4a801ff6951584")
-        
         buildViews()
         styleViews()
-        constraintViews()
+        
+        fetchData(urlString: "https://api.themoviedb.org/3/movie/" + String(movieId) + "?language=en-US&page=1&api_key=225631dc133673048d4a801ff6951584")
+        
+        group.notify(queue: .main){
+            self.constraintViews()
+            self.movieDetailsView.movieName.transform = self.movieDetailsView.movieName.transform.translatedBy(x: self.view.frame.width, y: 0)
+            self.movieDetailsView.date.transform = self.movieDetailsView.date.transform.translatedBy(x: self.view.frame.width, y: 0)
+            self.movieDetailsView.genres.transform = self.movieDetailsView.genres.transform.translatedBy(x: self.view.frame.width, y: 0)
+
+        }
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        UIView.animate(withDuration: 1,
+                       animations: {
+            self.movieDetailsView.movieName.transform = .identity
+        })
+        
+        UIView.animate(withDuration: 1,
+                       delay: 0.5,
+                       animations: {
+            self.movieDetailsView.date.transform = .identity
+        })
+        
+        UIView.animate(withDuration: 1,
+                       delay: 0.75,
+                       options: .curveEaseInOut,
+                       animations: {
+            self.movieDetailsView.genres.transform = .identity
+        })
     }
     
     private func buildViews() {
         tableView = UITableView()
         view.addSubview(tableView)
         
-        movieImageView = UIView()
-        tableView.addSubview(movieImageView)
+        moviePosterView = UIView()
+        tableView.addSubview(moviePosterView)
         
         
         navigationBarAppName = UIView()
@@ -74,7 +104,7 @@ class MovieDetailsViewController: UIViewController{
             $0.edges.equalTo(view.safeAreaLayoutGuide)
         }
         
-        movieImageView.snp.makeConstraints(){
+        moviePosterView.snp.makeConstraints(){
             $0.top.leading.trailing.equalTo(tableView)
             $0.height.equalToSuperview().dividedBy(2.5)
             $0.width.equalToSuperview()
@@ -93,38 +123,40 @@ class MovieDetailsViewController: UIViewController{
     }
     
     private func fetchData(urlString: String) {
-        
+        group.enter()
         networkData.fetchMovieDetails(path: urlString, completionHandler: {(result: Result<MovieDetails, RequestError>) in
             switch result{
             case .failure(let error):
                 print(error)
             case .success(let value):
-                
-                self.moviePoster = UIImageView()
-                self.moviePoster.kf.setImage(with: URL(string: "https://image.tmdb.org/t/p/original" + value.backdrop_path))
-                self.movieImageView.addSubview(self.moviePoster)
-                
-                self.moviePoster.contentMode = .scaleAspectFill
-                self.moviePoster.clipsToBounds = true
-                
-                self.moviePoster.snp.makeConstraints(){
-                    $0.edges.equalToSuperview()
-                }
-                
-                self.movieDetails = MovieImageView(movieDetails: value)
-                self.movieImageView.addSubview(self.movieDetails)
-                self.movieDetails.snp.makeConstraints(){
-                    $0.edges.equalToSuperview()
-                }
-                
-                self.movieOverviewView = MoviewOverviewView(movieDetails: value)
-                self.tableView.addSubview(self.movieOverviewView)
-                self.movieOverviewView.snp.makeConstraints(){
-                    $0.top.equalTo(self.movieImageView.snp.bottom)
-                    $0.leading.trailing.bottom.equalTo(self.tableView)
-                    $0.width.equalToSuperview()
+                DispatchQueue.main.async {
+                    self.moviePoster = UIImageView()
+                    self.moviePoster.kf.setImage(with: URL(string: "https://image.tmdb.org/t/p/original" + value.backdrop_path))
+                    self.moviePosterView.addSubview(self.moviePoster)
+                    
+                    self.moviePoster.contentMode = .scaleAspectFill
+                    self.moviePoster.clipsToBounds = true
+                    
+                    self.moviePoster.snp.makeConstraints(){
+                        $0.edges.equalToSuperview()
+                    }
+                    
+                    self.movieDetailsView.setMovie(movieDetails: value)
+                    self.moviePosterView.addSubview(self.movieDetailsView)
+                    self.movieDetailsView.snp.makeConstraints(){
+                        $0.edges.equalToSuperview()
+                    }
+                    
+                    self.movieOverviewView = MoviewOverviewView(movieDetails: value)
+                    self.tableView.addSubview(self.movieOverviewView)
+                    self.movieOverviewView.snp.makeConstraints(){
+                        $0.top.equalTo(self.moviePosterView.snp.bottom)
+                        $0.leading.trailing.bottom.equalTo(self.tableView)
+                        $0.width.equalToSuperview()
+                    }
                 }
             }
+            self.group.leave()
         })
     }
 }
